@@ -1,6 +1,9 @@
 # gkv-transformasi-matrix
 Tugas Kelas GKV Informatika Undip 2022
 
+# Hasil
+![Shariyl](media\videos\main\1080p60\Transformasi.mp4)
+
 # How to start?
 
 ## Setup Manim CE
