@@ -12,7 +12,6 @@ class Transformasiabrrot(ThreeDScene, MovingCamera):
         self.set_camera_orientation(phi=60*DEGREES, theta=-45*DEGREES, focal_distance=15)
 
         self.construct_axis()
-        # self.setup_cube()
         self.setup_polyhedra()
         self.write_mat()
         self.do_translate(2, 3, 2)
@@ -29,16 +28,6 @@ class Transformasiabrrot(ThreeDScene, MovingCamera):
         labx = axis.get_x_axis_label(Tex("$x$"))
 
         self.play(FadeIn(axis), Write(labz), Write(laby), Write(labx))
-
-    def setup_cube(self):
-        self.main_obj = main_obj = Cube(side_length=1)
-        main_obj.shift(RIGHT + 2*UP)
-        main_obj.set_stroke(BLUE_B, opacity=1.0)
-        main_obj.set_fill(BLUE_B, opacity=1.0)
-
-        self.play(DrawBorderThenFill(main_obj))
-
-        self.wait(0.5)
 
     def setup_polyhedra(self):
         # som som major
@@ -67,16 +56,6 @@ class Transformasiabrrot(ThreeDScene, MovingCamera):
         self.wait(0.5)
 
     def write_mat(self):
-        def get_cu_vertices():
-            points = self.main_obj.get_all_points()
-            points = points.round(2)
-            new_array = [tuple(row) for row in points]
-            vertices = np.unique(new_array, axis=0)
-
-            vertices = vertices[[0, 3, 8, 11, 20, 23, 28, 31], :]
-            vertices = vertices.transpose()
-            vertices = np.append(vertices, [[1, 1, 1, 1, 1, 1, 1, 1]], axis=0)
-            return vertices
 
         def get_poly_coords():
             coords_faces = self.main_obj.extract_face_coords()
@@ -125,10 +104,6 @@ class Transformasiabrrot(ThreeDScene, MovingCamera):
         self.begin_ambient_camera_rotation(45*DEGREES/3, about='theta')
         self.main_obj.add_updater(main_obj_rot_updater)
         self.wait(dur)
-        # self.stop_ambient_camera_rotation(about='theta')
-
-
-        # self.play(self.main_obj.rotate(angle=360*DEGREES, axis=AB, about_point=point_rot))
     
     def do_translate(self, x, y, z):
         self.play(self.main_obj.animate.shift(x*RIGHT + y*UP + z*OUT))
