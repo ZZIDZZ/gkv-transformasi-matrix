@@ -1,4 +1,5 @@
 from typing import List
+from typing_extensions import runtime
 from manim import *
 import numpy as np
 
@@ -106,10 +107,25 @@ class Transformasiabrrot(ThreeDScene, MovingCamera):
         self.wait(dur)
     
     def do_translate(self, x, y, z):
+        center = self.main_obj.get_center()
+        tlPoint = [center[0] + x, center[1]+y, center[2]+z] 
+        tlLine = Arrow3D(center, tlPoint)
+        self.play(Write(tlLine, runtime=5))
+        self.wait(5)
+        self.remove(tlLine)
         self.play(self.main_obj.animate.shift(x*RIGHT + y*UP + z*OUT))
         self.move_camera(phi=60*DEGREES, theta=-45*DEGREES, focal_distance=15, frame_center=self.main_obj.get_center())
 
     def do_scale(self, scale_fact):
+        center = self.main_obj.get_center()
+        scPointX = [center[0] * scale_fact, center[1], center[2]] 
+        scLineX = Arrow3D(center, scPointX)
+        scPointY = [center[0], center[1]*scale_fact, center[2]] 
+        scLineY = Arrow3D(center, scPointY)
+        scPointZ = [center[0], center[1] * scale_fact, center[2]] 
+        scLineZ = Arrow3D(center, scPointZ)
+        self.play(Write(scLineX, scLineY, scLineZ, runtime=5))
+        self.wait(5)
         self.play(self.main_obj.animate.scale(scale_fact))
         self.move_camera(phi=60*DEGREES, theta=-45*DEGREES, focal_distance=15, frame_center=self.main_obj.get_center())
 
