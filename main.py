@@ -15,11 +15,20 @@ class Transformasiabrrot(ThreeDScene, MovingCamera):
         self.construct_axis()
         self.setup_polyhedra()
         self.write_mat()
-        self.do_translate(2, 3, 2)
+        self.do_translate(2, 2, 3)
+        self.wait()
+        self.do_translate(-2, -3, 3)
         self.do_scale(2)
+        self.wait()
+        self.do_scale(1/2)
+        self.wait()
         self.do_rotation(90)
-        self.do_abrrot([2, 1, 0], [3, 3, 1], 5)
+        self.wait(2)
+        self.do_rotation(-90)
+        self.wait(1)
+        # self.do_abrrot([2, 1, 0], [3, 3, 1], 5)
 
+        self.move_camera(phi=60*DEGREES, theta=-45*DEGREES, focal_distance=15, frame_center=self.main_obj.get_center(), run_time=2)
 
     def construct_axis(self):
         axis = ThreeDAxes()
@@ -33,10 +42,10 @@ class Transformasiabrrot(ThreeDScene, MovingCamera):
     def setup_polyhedra(self):
         # som som major
         poly_points = [
-            [ 1, 0, 0], # V0 kanan
-            [ 0, 1, 0], # V1 atas
-            [-1, 0, 0], # V2 kiri
-            [ 0,-1, 0], # V3 bawah
+            [ 3, 0, 0], # V0 kanan
+            [ 0, 2, 0], # V1 atas
+            [-3, 0, 0], # V2 kiri
+            [ 0,-2, 0], # V3 bawah
             [ 0, 0, 1], # V4 keluar
             [ 0, 0,-1]  # V5 crot
         ]
@@ -51,9 +60,8 @@ class Transformasiabrrot(ThreeDScene, MovingCamera):
             [3, 0, 5],
         ]
         self.main_obj = main_obj = Polyhedron(vertex_coords=poly_points, faces_list=faces_list)
-        self.play(DrawBorderThenFill(main_obj))
-        self.move_camera(phi=60*DEGREES, theta=-45*DEGREES, focal_distance=15, frame_center=main_obj.get_center())
-        # self.play(main_obj.animate.shift(2*RIGHT + 2*UP))
+        self.play(DrawBorderThenFill(main_obj), run_time=2)
+        self.move_camera(phi=60*DEGREES, theta=-45*DEGREES, focal_distance=15, frame_center=main_obj.get_center(), run_time=2)
         self.wait(0.5)
 
     def write_mat(self):
@@ -63,24 +71,24 @@ class Transformasiabrrot(ThreeDScene, MovingCamera):
             # [print(n, n.shape) for n in coords_faces[0] + coords_faces[5]]
             coords = np.stack(coords_faces[0] + coords_faces[5])
             coords = coords.round(2)
-            print(coords)
+            # print(coords)
             coords = coords.transpose()
             coords = np.append(coords, [[1, 1, 1, 1, 1, 1]], axis=0)
-            print(coords)
+            # print(coords)
             return coords
 
         def matrix_updater(mob:Matrix):
             # https://www.reddit.com/r/manim/comments/oid6hv/comment/h4vxk5y/?utm_source=share&utm_medium=web2x&context=3
             newMat = Matrix(get_poly_coords(), h_buff=2)
             newMat.scale(0.5)
-            newMat.to_corner(UP + RIGHT)
+            newMat.to_corner(UP + LEFT)
             newMat.shift(OUT*20)
             mob.become(newMat, copy_submobjects=False)
 
         pmat = Matrix(get_poly_coords(), h_buff=2)
         self.add_fixed_in_frame_mobjects(pmat)
         pmat.scale(0.5)
-        pmat.to_corner(UP + RIGHT)
+        pmat.to_corner(UP + LEFT)
 
         self.play(Write(pmat))
         # self.add(pmat)
@@ -105,6 +113,8 @@ class Transformasiabrrot(ThreeDScene, MovingCamera):
         self.begin_ambient_camera_rotation(45*DEGREES/3, about='theta')
         self.main_obj.add_updater(main_obj_rot_updater)
         self.wait(dur)
+        self.main_obj.remove_updater(main_obj_rot_updater)
+        self.stop_ambient_camera_rotation(about="theta")
     
     def do_translate(self, x, y, z):
         center = self.main_obj.get_center()
@@ -113,8 +123,8 @@ class Transformasiabrrot(ThreeDScene, MovingCamera):
         self.play(Write(tlLine, runtime=5))
         self.wait(5)
         self.remove(tlLine)
-        self.play(self.main_obj.animate.shift(x*RIGHT + y*UP + z*OUT))
-        self.move_camera(phi=60*DEGREES, theta=-45*DEGREES, focal_distance=15, frame_center=self.main_obj.get_center())
+        self.play(self.main_obj.animate.shift(x*RIGHT + y*UP + z*OUT), run_time=2)
+        self.move_camera(phi=60*DEGREES, theta=-45*DEGREES, focal_distance=15, frame_center=self.main_obj.get_center(), run_time=2)
 
     def do_scale(self, scale_fact):
         center = self.main_obj.get_center()
@@ -125,9 +135,11 @@ class Transformasiabrrot(ThreeDScene, MovingCamera):
         scPointZ = [center[0], center[1] * scale_fact, center[2]] 
         scLineZ = Arrow3D(center, scPointZ)
         self.play(Write(scLineX, scLineY, scLineZ, runtime=5))
-        self.wait(5)
-        self.play(self.main_obj.animate.scale(scale_fact))
-        self.move_camera(phi=60*DEGREES, theta=-45*DEGREES, focal_distance=15, frame_center=self.main_obj.get_center())
+        phantom_axes = ThreeDAxes()
+        phantom_axes.set_opacity(0.0)
+        scl_group = VGroup(phantom_axes, self.main_obj)
+        self.play(scl_group.animate.scale(scale_fact), run_time=2)
+        self.move_camera(phi=60*DEGREES, theta=-45*DEGREES, focal_distance=15, frame_center=self.main_obj.get_center(), run_time=2)
 
     def do_rotation(self, deg):
-        self.play(self.main_obj.animate.rotate(angle=deg*DEGREES, axis=OUT, about_point=ORIGIN))
+        self.play(self.main_obj.animate.rotate(angle=deg*DEGREES, axis=UP, about_point=ORIGIN), run_time=2)
